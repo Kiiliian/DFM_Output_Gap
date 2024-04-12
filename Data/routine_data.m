@@ -72,7 +72,8 @@ xt = EAtransform(data,spec);
 
 idNaN=(sum(isnan(xt),2)>0.7*size(xt,2));																																																																																	% remove rows with large numbers of NaNs
 nld =(cumsum(idNaN)==(1:size(xt,1))'); xt(nld,:) = []; dates(nld,:) = [];																																																% --------------------------------------------------
-
+disp(size(idNaN))
+disp(size(nld))
 opts.maxiter = 1000; opts.thresh = 10^-6;																																																																						         	% select EM algorithm tuning parameters
 
 if isempty(method)
@@ -86,7 +87,7 @@ end
 %% IMPUTE OUTLIERS and COVID PERIOD
 [data_out,out,~] = remove_outliers(xt); no = sum(out,'all');																																																													%	remove outliers
 T19 = find(dates=='01-Oct-2019'); T21 = find(dates=='01-Oct-2021');																																																						% locate 2019Q4 and 2021Q4
-
+data_out
 %------------------------------------------------------------																																																					       % IMPUTATION
 switch method																																																																																																						      %==================================
     %--------------------------------------------------------																																																						      % Case 1: impute real variables
@@ -605,7 +606,7 @@ function [X,out,n] = remove_outliers(X,c)
 
 if nargin<2; c = 10; end
 
-mX = median(X,1,'omitnan');																																																																																														% median of each series
+mX = median(X,1,'omitnan');	% median of each series
 iqrX = iqr(X);																																																																																																										 % interquartile range of each series
 
 out = abs(X-repmat(mX,size(X,1),1)) > c*repmat(iqrX,size(X,1),1);																																																							 % identify outliers		% locate col/row of outliers

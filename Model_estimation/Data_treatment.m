@@ -1,20 +1,18 @@
+function [Xc, Name, dates] = Data_treatment(sheet,trans,method)            % Load data in levels
 
+    parts       = strsplit( pwd,                  filesep );
+    parent_path = strjoin(  parts( 1 : end - 1 ), filesep );
+    addpath( genpath( parent_path ) );
 
-function [Xc, Name, dates] = Data_treatment(sheet,trans,method)                   % Load data in levels
-        
+    dataset = readtable( join( [sheet, "data", ".xlsx"], "" ), ...
+        "Sheet", "data", "VariableNamingRule", "preserve" );			   % upload data
+    info    = readtable( join( [sheet, "data", ".xlsx"], "" ), ...
+        "Sheet", "info" );
+    spec = table2struct( info, "ToScalar", true );						   % upload info
 
-%[sheet,trans,method]
-%[sheet,IDf,trans,method,q] 
-
-parts = strsplit(pwd, filesep); parent_path = strjoin(parts(1:end-1), filesep);
-addpath(genpath(parent_path));
-
-dataset = readtable(join([sheet,'data','.xlsx'],''),'Sheet','data','VariableNamingRule','preserve');																	    % upload data
-info = readtable(join([sheet,'data','.xlsx'],''),'Sheet','info'); spec = table2struct(info, "ToScalar",true);								    % upload info
-
-data = table2array(dataset(:,2:end));  																																																																																  % array of data
-Name = string(dataset(:,2:end).Properties.VariableNames);																																																														% titles
-dates = table2array(dataset(:,1));	
+    data  = table2array( dataset( :, 2 : end ) );  						   % array of data
+    Name  = string(      dataset( :, 2 : end ).Properties.VariableNames ); % titles
+    dates = table2array( dataset( :, 1 ) );
 
 q = 99;
 
@@ -41,18 +39,18 @@ if method==0 																																																					              
 end                                                       
 
 %% IMPUTE OUTLIERS and COVID PERIOD
-[data_out,out,~] = remove_outliers(xt); no = sum(out,'all');																																																													%	remove outliers
+[data_out,out,~] = remove_outliers(xt);																																																													%	remove outliers
 T19 = find(dates=='01-Oct-2019'); T21 = find(dates=='01-Oct-2021');% locate 2019Q4 and 2021Q4
 %------------------------------------------------------------																																																					       % IMPUTATION																																																																																																					      %==================================
     %--------------------------------------------------------																																																						      % Case 1: impute real variables
     if method== 1                                                   																																																						      %----------------------------------
         loc = strcmp(spec.Class,'R');                  																																																						      % locate real variables
         Xnan = data_out; Xnan(T19+1:T21,loc) = nan;																																																						                % NaN-out Covid period
-        [Xc,pc] = EMimputation(Xnan,q,opts);
+        [Xc,~] = EMimputation(Xnan,q,opts);
     end% impute outliers w/ [MN16]
         %-------------------------------------------------------- 																																																					  %-----------------------------------
     if method== 2                                                                                                               % Case 2: impute w/ [MN16]
-        [Xc,pc] = EMimputation(data_out,q,opts);	
+        [Xc,~] = EMimputation(data_out,q,opts);	
     end%-----------------------------------	
         %--------------------------------------------------------    																																																				% Case 3: impute recursively w/ KS
     if method== 3                                                    																																																		         %-----------------------------------
@@ -79,13 +77,13 @@ T19 = find(dates=='01-Oct-2019'); T21 = find(dates=='01-Oct-2021');% locate 2019
         Xc(T19+1:T21,:) = (KF.ZtT(T19+1:T21,1:size(pc.F,2))*pc.C').*sx(T19+1:T21,:) + mx(T19+1:T21,:);								     		    % impute data w/ smoothed estimates
         
         [data_out1,~,~] = remove_outliers(Xc);                    																																																					  %	remove outliers
-        [Xc,pc] = EMimputation(data_out1,q,opts);
+        [Xc,~] = EMimputation(data_out1,q,opts);
     end% impute residual outliers/missing values w/ [MN16]
 
         %--------------------------------------------------------    																																																				% Case 4: impute w/ PCA
     if method== 4
         disp("test")
-        [X19,pc19] = EMimputation(data_out(1:T19,:),q,opts);																																																											  % impute pre-Covid outliers w/ [MN16]
+        [X19,~] = EMimputation(data_out(1:T19,:),q,opts);																																																											  % impute pre-Covid outliers w/ [MN16]
         Xnan = data_out; Xnan(1:T19,:) = X19; Xnan(T19+1:T21,:) = nan;																																																			% NaN-out Covid period
         mx = repmat(mean(X19),size(X19,1),1); sx = repmat(std(X19),size(X19,1),1); Xs = (X19-mx)./sx;                    % standardized pre-Covid data 
         if q==99; q = baing(Xs,20,2); end          																																																						                % select n. of factors
@@ -97,7 +95,7 @@ T19 = find(dates=='01-Oct-2019'); T21 = find(dates=='01-Oct-2021');% locate 2019
         end	
         disp("test")
         [data_out1,~,~] = remove_outliers(Xnan);                    																																																					%	remove outliers
-        [Xc,pc] = EMimputation(data_out1,q,opts);
+        [Xc,~] = EMimputation(data_out1,q,opts);
     end% impute residual outliers/missing values w/ [MN16]
 %------------------------------------------------------------
 
@@ -180,7 +178,7 @@ TT2(:,id_flow) = retime(TT(:,id_flow),'quarterly',@(x) sum(x));																	
 
 datasetQ = timetable2table(TT2); dataQ = table2array(datasetQ(:,2:end));																																																	% dataset (table) and data (array)
 datesQ = table2array(datasetQ(:,1));																																																																																					% dates
-
+end
 
 %-----------------------------------------------------------------------------------------------------------------------
 function Xt = EAtransform(X,spec)
@@ -283,7 +281,7 @@ elseif spec.agg==0																																																														
     %-------------------------------------------																																																																									%--------------------------------
 end																																																																																																																						%
 %-----------------------------------------------																																																																									%================================
-
+end
 
 %-----------------------------------------------------------------------------------------------------------------------
 
@@ -376,7 +374,7 @@ while err>opts.thresh&&j<opts.maxiter
 end
 %----------------------------------------------------------------------------------------------                          %----------------------------
 
-
+end
 %-----------------------------------------------------------------------------------------------------------------------
 
 function pc = princfact(X,q,method,st)
@@ -468,7 +466,7 @@ chi = f*C';																																																																					
 R = diag(diag(cov(X-chi)));																																																																																														% variance idiosyncratic component ---> diagonal (approximate factor model)
 
 pc.F = f; pc.C = C; pc.chi = chi; pc.R = R; pc.d = diag(d);
-
+end
 
 %-----------------------------------------------------------------------------------------------------------------------
 
@@ -505,7 +503,7 @@ n = sum(out,1);																																																																	
 X(out) = NaN;																																																																																																												% replace outliers with NaN
 
 
-
+end
 %-----------------------------------------------------------------------------------------------------------------------
 
 function Y = mdiff(X,s,k)
@@ -546,7 +544,7 @@ end																																																																													
 
 Y(s*k+1:end,:) = dX;																																																																																																				 % build output matrix
 
-
+end
 
 %-----------------------------------------------------------------------------------------------------------------------
 
@@ -734,7 +732,7 @@ chat=Fhat*Lambda';
 eigval=diag(eigval);
 
 
-
+end
 %-----------------------------------------------------------------------------------------------------------------------
 
 function pos = minindc(x)
@@ -786,7 +784,7 @@ for index=1:ncols
     pos(index)=sum(colmin_i);
 
 end
-
+end
 
 
 %-----------------------------------------------------------------------------------------------------------------------
@@ -920,7 +918,7 @@ end
 %---------------------------------------------------------------------------------------------------------------         % ============================= 
 	KF.ZtT = KF.ZtT';																																																																																																							% smoothed states
 
-
+end
 %-----------------------------------------------------------------------------------------------------------------------
 
 function res = estVAR(Y,p,opts)
@@ -1017,7 +1015,7 @@ res.Q_ML = res.Q*((T-res.k)/T);                                                 
 
 res.loglik = -(T*N/2)*log(2*pi) - (T/2)*log(det(res.Q_ML));                                                              % log-likelihood
 for t=1:T; res.loglik = res.loglik - (1/2)*(res.u(t,:)/res.Q_ML*res.u(t,:)'); end                                        % --------------
-
+end
 
 
 %-----------------------------------------------------------------------------------------------------------------------
@@ -1062,7 +1060,8 @@ switch method                                                                   
       else; X = []; for index=1:N; for j=1:p; X = cat(2,X,Y(p-j+1:end-j,index)); end; end
       end  
       %----------------------------------------------------                                                              %------------------                                                             %------------------
-end                                                                                                                      %==================
+end %==================
+end
 
 
 function out = lagselection(Y,opts)
@@ -1126,5 +1125,5 @@ LR = TT(1:end-1).*abs(diff(LR)); out.LRp = flip(1 - chi2cdf(LR,N^2));           
 
 out.crit = {'BIC','AIC','HQC'};                                                                                          % criteria employed 
 out.p = [find(min(BIC)),find(min(AIC)),find(min(HQC))];                                                                  % lag order 
-
-
+end
+end

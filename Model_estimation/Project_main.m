@@ -259,7 +259,7 @@ title(['Cycle ' tostring(plot_ii) ' - Level'],'fontweight','bold','fontsize',16)
 ZZ= [diff(ww(:,plot_ii)) zeros(length(Dates)-1,1)];ZZ=ZZ(j0:end,:);  % -------------------
 plot(Dates_plot(j0+1:end),ZZ);
 print('-depsc','-vector','-r600',[nomefile 'cycle4q'  tostring(plot_ii)]);     % -------------------
-title(['Cycle ' tostring(plot_ii) ' - Fist diffrence','fontweight','bold','fontsize',16)   % -------------------
+title(['Cycle ' tostring(plot_ii) ' - Fist diffrence'],'fontweight','bold','fontsize',16)   % -------------------
 end
 
 

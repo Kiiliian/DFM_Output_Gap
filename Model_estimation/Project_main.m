@@ -189,8 +189,9 @@ ZZb{1}=BL_Band(chic(j0:end,1),squeeze(chicB(j0:end,1,:)),alpha1);           % --
 ZZb{2}=BL_Band(chic(j0:end,1),squeeze(chicB(j0:end,1,:)),alpha2);           % -------------------
 SizeXY=ML_SizeXY(DD,ML_minmax([ZZ ZZb{1}]),1,5,[-60 60]);                   % -------------------
 BL_ShadowPlotBW(ZZb,ZZ,DD,lg1,SizeXY,LS([2 1]),1,2)
-print('-depsc','-vector','-r600',[nomefile 'OG']);     % -------------------
+print('-dpng','-vector','-r600',[nomefile 'OG']);     % -------------------
 title('Output Gap - Level','fontweight','bold','fontsize',16)   % -------------------
+%print('-depsc','-vector','-r600',[nomefile 'OG']);
 
 
  % Output Gap - 4Q
@@ -199,7 +200,7 @@ ZZb{1}=BL_Band(ZZ,squeeze(ML_diff(chicB(j0:end,1,:),1)),alpha1);       % -------
 ZZb{2}=BL_Band(ZZ,squeeze(ML_diff(chicB(j0:end,1,:),1)),alpha2);       % ---------------
 SizeXY=ML_SizeXY(Dates4q(j0:end),ML_minmax([ZZ ZZb{1}]),1,5,[-60 60]);      % ---------------
 BL_ShadowPlotBW(ZZb,ZZ,Dates4q(j0:end),lg1,SizeXY,LS([2 1]),1,2)
-print('-depsc','-vector','-r600',[nomefile 'OG4Q']);    % ---------------
+print('-dpng','-vector','-r600',[nomefile 'OG4Q']);    % ---------------
 title('Output Gap - 4Q % changes','fontweight','bold','fontsize',16) 
 
 
@@ -210,7 +211,7 @@ YYb{2}=BL_Band(YY(:,2),squeeze(chitB(j0:end,1,:)),alpha2);                      
 SizeXY=ML_SizeXY(DD(1:60),ML_minmax([YY YYb{1}]),1,5);          
 YYY{1}=YYb{1}(1:60,:); YYY{2}=YYb{2}(1:60,:);                                   % ------------------------
 BL_ShadowPlotBW(YYY,YY(1:60,:),DD(1:60),lg2,SizeXY,LS([2 1]),1,5)
-print('-depsc','-vector','-r600',[nomefile 'PO_7084']);	% ------------------------
+print('-dpng','-vector','-r600',[nomefile 'PO_7084']);	% ------------------------
 title('Potential Output - 4Q % changes','fontweight','bold','fontsize',16) 
 
 
@@ -220,7 +221,7 @@ ZZb{1}=BL_Band(ZZ(:,2),squeeze(ML_diff(chitB(j0:end,1,:),1)),alpha1);       % --
 ZZb{2}=BL_Band(ZZ(:,2),squeeze(ML_diff(chitB(j0:end,1,:),1)),alpha2);       % ---------------------
 SizeXY=ML_SizeXY(Dates4q(j0:end),ML_minmax([ZZ ZZb{1}]),1,5,[-60 60]);      % ---------------------
 BL_ShadowPlotBW(ZZb,ZZ,Dates4q(j0:end),lg2,SizeXY,LS([2 1]))
-if STAMPA==1; print('-depsc','-vector','-r600',[nomefile 'PO']); end      % ---------------------
+print('-dpng','-vector','-r600',[nomefile 'PO']);      % ---------------------
 title('Potential Output - 4Q % changes','fontweight','bold','fontsize',16) 	% ---------------------
 
 
@@ -228,7 +229,7 @@ title('Potential Output - 4Q % changes','fontweight','bold','fontsize',16) 	% --
  ZZ=ML_diff([chit(:,1) chic(:,1) zeta(:,1)],1); YY=ML_diff(Y2(:,1),1);               
 ML_ContributionGraphBW(YY(j0:4:end),ZZ(j0:4:end,:),Dates4q(j0:4:end),...     %
     {'GDP','Potential output','Output gap','Idiosyncratic'});                       % --------------------------
-print('-depsc','-vector','-r600',[nomefile 'DecompGDP_BL']);   % --------------------------
+print('-dpng','-vector','-r600',[nomefile 'DecompGDP_BL']);   % --------------------------
 title('GDP growth decomposition','fontweight','bold','fontsize',16)
 
 Dates_plot = year(Dates)+ (month(Dates)-1)/11;
@@ -236,14 +237,14 @@ Dates_plot = year(Dates)+ (month(Dates)-1)/11;
 % Trend - levels
 ZZ=[tautau zeros(length(Dates),1)]; ZZ=ZZ(j0:end,:); % -------------------
 plot(Dates_plot(j0:end,:),ZZ);
-print('-depsc','-vector','-r600',[nomefile 'trend']);     % -------------------
+print('-dpng','-vector','-r600',[nomefile 'trend']);     % -------------------
 title('Trend - Level','fontweight','bold','fontsize',16)   % -------------------
 
 
 %  % Trend - 4Q
 ZZ= [diff(tautau(:,1)) zeros(length(Dates)-1,1)];ZZ=ZZ(j0:end,:);  % -------------------
 plot(Dates_plot(j0+1:end),ZZ);
-print('-depsc','-vector','-r600',[nomefile 'trend4q']);     % -------------------
+print('-dpng','-vector','-r600',[nomefile 'trend4q']);     % -------------------
 title('Trend - First difference','fontweight','bold','fontsize',16)   % -------------------
 
 
@@ -251,14 +252,14 @@ for plot_ii = 1:q
 %  cycle - levels
 ZZ=[ww(:,plot_ii) zeros(length(Dates),1)]; ZZ=ZZ(j0:end,:); % -------------------
 plot(Dates_plot(j0:end,:),ZZ);
-print('-depsc','-vector','-r600',[nomefile 'cycle_' tostring(plot_ii)]);     % -------------------
+print('-dpng','-vector','-r600',[nomefile 'cycle_' tostring(plot_ii)]);     % -------------------
 title(['Cycle ' tostring(plot_ii) ' - Level'],'fontweight','bold','fontsize',16)   % -------------------
 
 
 %  cycle - 4Q
 ZZ= [diff(ww(:,plot_ii)) zeros(length(Dates)-1,1)];ZZ=ZZ(j0:end,:);  % -------------------
 plot(Dates_plot(j0+1:end),ZZ);
-print('-depsc','-vector','-r600',[nomefile 'cycle4q'  tostring(plot_ii)]);     % -------------------
+print('-dpng','-vector','-r600',[nomefile 'cycle4q'  tostring(plot_ii)]);     % -------------------
 title(['Cycle ' tostring(plot_ii) ' - Fist diffrence'],'fontweight','bold','fontsize',16)   % -------------------
 end
 

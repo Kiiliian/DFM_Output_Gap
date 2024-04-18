@@ -31,7 +31,7 @@ rr=ones(q,1);                                           % ----------------------
 TV.id={1:2,75};                                                 % time varying parameters
 TV.Type={['trend';'none '],'mean'};                             % -----------------------
 TV.q0=[10^(-3), 10^(-2)];                                       % initial variance for TV states
-nboot=5;                                                     % Number of bootstrap
+nboot=10;                                                     % Number of bootstrap
 iter = 50;
 method_data = 4;                                                %Method to impute covid data
 country = "FR";                                                  %Country
@@ -252,15 +252,15 @@ for plot_ii = 1:q
 %  cycle - levels
 ZZ=[ww(:,plot_ii) zeros(length(Dates),1)]; ZZ=ZZ(j0:end,:); % -------------------
 plot(Dates_plot(j0:end,:),ZZ);
-print('-dpng','-vector','-r600',[nomefile 'cycle_' tostring(plot_ii)]);     % -------------------
-title(['Cycle ' tostring(plot_ii) ' - Level'],'fontweight','bold','fontsize',16)   % -------------------
+print('-dpng','-vector','-r600',[nomefile 'cycle_' num2str(plot_ii)]);     % -------------------
+title(['Cycle ' num2str(plot_ii) ' - Level'],'fontweight','bold','fontsize',16)   % -------------------
 
 
 %  cycle - 4Q
 ZZ= [diff(ww(:,plot_ii)) zeros(length(Dates)-1,1)];ZZ=ZZ(j0:end,:);  % -------------------
 plot(Dates_plot(j0+1:end),ZZ);
-print('-dpng','-vector','-r600',[nomefile 'cycle4q'  tostring(plot_ii)]);     % -------------------
-title(['Cycle ' tostring(plot_ii) ' - Fist diffrence'],'fontweight','bold','fontsize',16)   % -------------------
+print('-dpng','-vector','-r600',[nomefile 'cycle4q'  num2str(plot_ii)]);     % -------------------
+title(['Cycle ' num2str(plot_ii) ' - Fist diffrence'],'fontweight','bold','fontsize',16)   % -------------------
 end
 
 

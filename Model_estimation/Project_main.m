@@ -2,8 +2,9 @@
 %%%% Pablo BARRIO & Kilian ANDRU
 %%%% Estimate Output Gap with Non-Stationnary data
 
-clear all;
-clear clc;
+clear
+close all
+clc
 
 %giorno='20190329';                                              % RESTAT SUBMISSION
 %gm=datenum(str2num(giorno(1:4)),...                     % -----------------
@@ -30,10 +31,14 @@ rr=ones(q,1);                                           % ----------------------
 TV.id={1:2,75};                                                 % time varying parameters
 TV.Type={['trend';'none '],'mean'};                             % -----------------------
 TV.q0=[10^(-3), 10^(-2)];                                       % initial variance for TV states
-nboot=1000;                                                     % Number of bootstrap
+nboot=5;                                                     % Number of bootstrap
 iter = 50;
+method_data = 4;                                                %Method to impute covid data
+country = "FR";                                                  %Country
+trans_treatment = 'light';                                      %Transformation for data treatment
+Block = 9;                                                       %Average size of blocks for bootstrap procedure
 
-[Y, Names, dates, info] = Data_treatment('FR', 'light', 2 );
+[Y, Names, dates] = Data_treatment(country, trans_treatment, method_data );
 
 %%% =============================== %%%
 %%%  Initialize the model with PCA  %%%
@@ -88,33 +93,173 @@ MY=repmat(b(:,1)',T3,1);
 start2=start+s+cc-1;
 Y2=Y(start2:end,:);
 chi=(FF1(cc:end,:)*L'+BT(start2:end,:)).*SY+MY;                            % common component
-zeta=Y2-chi;     
-
+zeta=Y2-chi;  
 
 %%% ================================= %%%
 %%%  Estimate common trend and cycles of Factors with EM  %%%
 %%% ================================= %%%
+
+disp("Decomposition");
 
 %%% Initialization of EM through PCA %%%
 
 [t,n]=size(FF);                                                          % size of the panel of factors
 q2 = 1;                                                                  % number of trends
 p2 = 1;                                                                  % number of lags in VAR of trends
-[tau00 ,Psi0]=ML_efactors2(FF, q2 ,2);                                      % estimate psi aka the loadings of the trends
+[tau00_1 ,Psi0]=ML_efactors2(FF, q2 ,2);                                      % estimate psi aka the loadings of the trends
 Z=X./repmat(sy,size(X,1),1);                                             % BLL - Standardization
-%tau00=FF*Psi/N;                                                            % trends
+tau00 = FF(1,:)*Psi0/N;                                                            % trends
 A = 1;
 %[A0,v,AL]=ML_VAR(tau,p2,1);                                              % Estimate VAR
 w00 = FF-tau00*Psi0';                                                         % idiosyncratic component/cycles
 R = cov(w00);
-Q = cov(ML_diff(tau00));
-P00 = ;
+Q = var(ML_diff(tau00_1));
+P00 = var(tau00_1);
 
 EM2 = EM_decomposition(FF,tau00,P00,Psi0,R,Q,q2,maxiter,tresh,cc);
 
-tautau = EM2.tau;
-ww = EM2. ; %
+tautau = EM2.xitT;
+Qtau = EM2.Q;
+Rww = EM2.R;
 Psi = EM2.Psi;
+psi_tau = tautau*Psi';                                                  %Common trend
+ww = FF - psi_tau;                                                      % cycles
 
+
+chit = (psi_tau(cc:end,:)*L2'+BT(start2:end,:)).*SY+MY;                 % common stochastic trend plus linear trend
+chist = (psi_tau(cc:end,:)*L2').*SY+MY;                                 % common stochastic trend
+chic = (ww(cc:end,:)*L2').*SY;                                          % common temporary
+chint = (psi_tau(cc:end,:)*L2').*SY;                                    % common stochastic trend
+chilt = (BT(start2:end,:)).*SY;                                         % linear trend
+    
+
+%%% ================================= %%%
+%%%  Bootstrap procedure  %%%
+%%% ================================= %%%
+
+disp("Bootstrap");
+
+eta=Z2-EM.xitT*EM.Lambda';
+chiB=NaN*repmat(chi,1,1,nboot); chicB=chiB; chitB=chiB;
+tic
+type2=NSDFM_SS.type2;
+
+parfor bb=1:nboot; disp(bb)
+
+    [Z2s,xitTs]=ML_NSDFM_DGP_GDO_TV(T+1,N,q,s,p,EM,eta,type2,[1 0],Block);
+    Boot=Bootstrap_GDO_TV(Z2s,NSDFM_SS,GDO,iter,tresh,cc,EM,xitTs,maxiter);
+    chiB(:,:,bb)=Boot.chi.*SY+MY;
+    chicB(:,:,bb)=Boot.chic.*SY;
+    chitB(:,:,bb)=Boot.chit.*SY+MY;
+end
+toc
+
+
+ %%% ====================== %%%
+ %%% == ---------------- == %%%
+ %%% == Plotting Results == %%%
+ %%% == ---------------- == %%%
+ %%% ====================== %%%
+
+ alpha1=16; alpha2=32;
+ Dates = datenum(dates);
+ Dates2=Dates(start2:end); Dates2d=Dates2(2:end); Dates4q=Dates2(5:end);     % New Dates for plots
+ j0=1;                                                                       % Strarting point for all graphs
+ colore={[0 0.45 0.74],[0.64 0.08 0.18],[0.85 0.33 0.1],...                  % colors for gaps blue, red, orange
+        [0.93 0.69 0.13],[0 0 0],[0.47 0.67 0.19],[0.49 0.18 0.56]};         % yellow,black, green, purple
+ nm=size(chic,2);                                                            % number of possible decompositions
+ qsp=[num2str(q) num2str(s) num2str(p)];
+ DD=Dates2(j0:end);
+
+
+LS={'k-','k--','k:','k-.'};
+nomefile='Figure_';
+
+
+lg1={'Estimation'};
+lg2={'GDP','Estimation'};
+
+%%% ============ %%%
+%%%  Output gap  %%%
+%%% ============ %%%
+
+% Output Gap - levels
+ZZ=chic(:,1); ZZ=ZZ(j0:end,:);                          
+ZZb{1}=BL_Band(chic(j0:end,1),squeeze(chicB(j0:end,1,:)),alpha1);           % -------------------
+ZZb{2}=BL_Band(chic(j0:end,1),squeeze(chicB(j0:end,1,:)),alpha2);           % -------------------
+SizeXY=ML_SizeXY(DD,ML_minmax([ZZ ZZb{1}]),1,5,[-60 60]);                   % -------------------
+BL_ShadowPlotBW(ZZb,ZZ,DD,lg1,SizeXY,LS([2 1]),1,2)
+print('-depsc','-vector','-r600',[nomefile 'OG']);     % -------------------
+title('Output Gap - Level','fontweight','bold','fontsize',16)   % -------------------
+
+
+ % Output Gap - 4Q
+ZZ= chic(:,1); ZZ=ML_diff(ZZ(j0:end,:),1);               
+ZZb{1}=BL_Band(ZZ,squeeze(ML_diff(chicB(j0:end,1,:),1)),alpha1);       % ---------------
+ZZb{2}=BL_Band(ZZ,squeeze(ML_diff(chicB(j0:end,1,:),1)),alpha2);       % ---------------
+SizeXY=ML_SizeXY(Dates4q(j0:end),ML_minmax([ZZ ZZb{1}]),1,5,[-60 60]);      % ---------------
+BL_ShadowPlotBW(ZZb,ZZ,Dates4q(j0:end),lg1,SizeXY,LS([2 1]),1,2)
+print('-depsc','-vector','-r600',[nomefile 'OG4Q']);    % ---------------
+title('Output Gap - 4Q % changes','fontweight','bold','fontsize',16) 
+
+
+% Potential output (levels)
+YY=[Y2(:,1)  chit(:,1)]; YY=YY(j0:end,:);                       
+YYb{1}=BL_Band(YY(:,2),squeeze(chitB(j0:end,1,:)),alpha1);                         % ------------------------
+YYb{2}=BL_Band(YY(:,2),squeeze(chitB(j0:end,1,:)),alpha2);                         % ------------------------
+SizeXY=ML_SizeXY(DD(1:60),ML_minmax([YY YYb{1}]),1,5);          
+YYY{1}=YYb{1}(1:60,:); YYY{2}=YYb{2}(1:60,:);                                   % ------------------------
+BL_ShadowPlotBW(YYY,YY(1:60,:),DD(1:60),lg2,SizeXY,LS([2 1]),1,5)
+print('-depsc','-vector','-r600',[nomefile 'PO_7084']);	% ------------------------
+title('Potential Output - 4Q % changes','fontweight','bold','fontsize',16) 
+
+
+% Potential Output - 4Q
+ZZ=[Y2(:,1) chit(:,1)]; ZZ=ML_diff(ZZ(j0:end,:),1);        
+ZZb{1}=BL_Band(ZZ(:,2),squeeze(ML_diff(chitB(j0:end,1,:),1)),alpha1);       % ---------------------
+ZZb{2}=BL_Band(ZZ(:,2),squeeze(ML_diff(chitB(j0:end,1,:),1)),alpha2);       % ---------------------
+SizeXY=ML_SizeXY(Dates4q(j0:end),ML_minmax([ZZ ZZb{1}]),1,5,[-60 60]);      % ---------------------
+BL_ShadowPlotBW(ZZb,ZZ,Dates4q(j0:end),lg2,SizeXY,LS([2 1]))
+if STAMPA==1; print('-depsc','-vector','-r600',[nomefile 'PO']); end      % ---------------------
+title('Potential Output - 4Q % changes','fontweight','bold','fontsize',16) 	% ---------------------
+
+
+% Contribution to GDP growth (BL)
+ ZZ=ML_diff([chit(:,1) chic(:,1) zeta(:,1)],1); YY=ML_diff(Y2(:,1),1);               
+ML_ContributionGraphBW(YY(j0:4:end),ZZ(j0:4:end,:),Dates4q(j0:4:end),...     %
+    {'GDP','Potential output','Output gap','Idiosyncratic'});                       % --------------------------
+print('-depsc','-vector','-r600',[nomefile 'DecompGDP_BL']);   % --------------------------
+title('GDP growth decomposition','fontweight','bold','fontsize',16)
+
+Dates_plot = year(Dates)+ (month(Dates)-1)/11;
+
+% Trend - levels
+ZZ=[tautau zeros(length(Dates),1)]; ZZ=ZZ(j0:end,:); % -------------------
+plot(Dates_plot(j0:end,:),ZZ);
+print('-depsc','-vector','-r600',[nomefile 'trend']);     % -------------------
+title('Trend - Level','fontweight','bold','fontsize',16)   % -------------------
+
+
+%  % Trend - 4Q
+ZZ= [diff(tautau(:,1)) zeros(length(Dates)-1,1)];ZZ=ZZ(j0:end,:);  % -------------------
+plot(Dates_plot(j0+1:end),ZZ);
+print('-depsc','-vector','-r600',[nomefile 'trend4q']);     % -------------------
+title('Trend - First difference','fontweight','bold','fontsize',16)   % -------------------
+
+
+for plot_ii = 1:q
+%  cycle - levels
+ZZ=[ww(:,plot_ii) zeros(length(Dates),1)]; ZZ=ZZ(j0:end,:); % -------------------
+plot(Dates_plot(j0:end,:),ZZ);
+print('-depsc','-vector','-r600',[nomefile 'cycle_' tostring(plot_ii)]);     % -------------------
+title(['Cycle ' tostring(plot_ii) ' - Level'],'fontweight','bold','fontsize',16)   % -------------------
+
+
+%  cycle - 4Q
+ZZ= [diff(ww(:,plot_ii)) zeros(length(Dates)-1,1)];ZZ=ZZ(j0:end,:);  % -------------------
+plot(Dates_plot(j0+1:end),ZZ);
+print('-depsc','-vector','-r600',[nomefile 'cycle4q'  tostring(plot_ii)]);     % -------------------
+title(['Cycle ' tostring(plot_ii) ' - Fist diffrence','fontweight','bold','fontsize',16)   % -------------------
+end
 
 

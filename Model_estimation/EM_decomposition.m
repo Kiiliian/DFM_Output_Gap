@@ -39,7 +39,11 @@ pq=q*p;                                                                     % Nu
 [xitT,PtT,PtTm]=ML_KalmanSmoother2(A,xitt',xittm',Ptt,Pttm,Psi,R);       % Kalman Smoother
 tau00=xitT(1,:)'; P00=PtT(:,:,1);                                             % initial conditions
 tau=xitT(:,1:q);                                                              % factors
-tautau=[]; for ss=0:s; tautau=cat(2,tautau,tautau(s-ss+1:end-ss,:)); end                     % lagged factors 0:s
+tautau=[];
+
+for ss=0:s
+    tautau=cat(2,tautau,tau(s-ss+1:end-ss,:));
+end                                                                        % lagged factors 0:s
 
 loglik1=loglik;                                                             % likelihood
 

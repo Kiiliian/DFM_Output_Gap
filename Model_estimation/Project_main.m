@@ -34,7 +34,7 @@ TV.q0=[10^(-3), 10^(-2)];                                       % initial varian
 nboot=1000;                                                     % Number of bootstrap
 iter = 100;
 method_data = 4;                                                %Method to impute covid data
-country = "DE";                                                  %Country
+country = "FR";                                                  %Country
 trans_treatment = 'light';                                      %Transformation for data treatment
 Block = 9;                                                       %Average size of blocks for bootstrap procedure
 
@@ -148,9 +148,17 @@ parfor bb=1:nboot; disp(bb)
 
     [Z2s,xitTs]=ML_NSDFM_DGP_GDO_TV(T+1,N,q,s,p,EM,eta,type2,[1 0],Block);
     Boot=Bootstrap_GDO_TV(Z2s,NSDFM_SS,GDO,iter,tresh,cc,EM,xitTs,maxiter);
+    if country == "FR"
     chiB(:,:,bb)=Boot.chi.*SY+MY;
     chicB(:,:,bb)=Boot.chic.*SY;
     chitB(:,:,bb)=Boot.chit.*SY+MY;
+    end
+    if country == "DE"
+    chiB(:,:,bb)=Boot.chi;
+    chicB(:,:,bb)=Boot.chic;
+    chitB(:,:,bb)=Boot.chit;
+    end
+
 end
 toc
 
@@ -216,8 +224,6 @@ YY=[Y3(:,1)  chit3(:,1)]; YY=YY(j0:end,:);
 YYb{1}=BL_Band(YY(:,2),squeeze(chitB3(j0:end,1,:)),alpha1);                         % ------------------------
 YYb{2}=BL_Band(YY(:,2),squeeze(chitB3(j0:end,1,:)),alpha2);                         % ------------------------
 SizeXY=ML_SizeXY(DD(1:60),ML_minmax([YY YYb{1}]),1,5);
-SizeXY(3)=SizeXY(3)+200;
-SizeXY(4)=SizeXY(4)-250;
 YYY{1}=YYb{1}(1:60,:); YYY{2}=YYb{2}(1:60,:);                                   % ------------------------
 BL_ShadowPlotBW(YYY,YY(1:60,:),DD(1:60),lg2,SizeXY,LS([2 1]),2,4,50)
 print('-dpng','-vector','-r600',[nomefile 'PO_7084']);	% ------------------------

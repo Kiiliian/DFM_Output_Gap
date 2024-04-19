@@ -31,8 +31,8 @@ rr=ones(q,1);                                           % ----------------------
 TV.id={1:2,75};                                                 % time varying parameters
 TV.Type={['trend';'none '],'mean'};                             % -----------------------
 TV.q0=[10^(-3), 10^(-2)];                                       % initial variance for TV states
-nboot=10;                                                     % Number of bootstrap
-iter = 50;
+nboot=50;                                                     % Number of bootstrap
+iter = 1000;
 method_data = 4;                                                %Method to impute covid data
 country = "FR";                                                  %Country
 trans_treatment = 'light';                                      %Transformation for data treatment
@@ -126,11 +126,11 @@ psi_tau = tautau*Psi';                                                  %Common 
 ww = FF - psi_tau;                                                      % cycles
 
 
-chit = (psi_tau(cc:end,:)*L2'+BT(start2:end,:)).*SY+MY;                 % common stochastic trend plus linear trend
-chist = (psi_tau(cc:end,:)*L2').*SY+MY;                                 % common stochastic trend
-chic = (ww(cc:end,:)*L2').*SY;                                          % common temporary
-chint = (psi_tau(cc:end,:)*L2').*SY;                                    % common stochastic trend
-chilt = (BT(start2:end,:)).*SY;                                         % linear trend
+chit = (psi_tau(cc:end,:)*L2'+BT(start2:end,:));                 % common stochastic trend plus linear trend
+chist = (psi_tau(cc:end,:)*L2');                                 % common stochastic trend
+chic = (ww(cc:end,:)*L2');                                          % common temporary
+chint = (psi_tau(cc:end,:)*L2');                                    % common stochastic trend
+chilt = (BT(start2:end,:));                                         % linear trend
     
 
 %%% ================================= %%%
@@ -188,7 +188,7 @@ ZZ=chic(:,1); ZZ=ZZ(j0:end,:);
 ZZb{1}=BL_Band(chic(j0:end,1),squeeze(chicB(j0:end,1,:)),alpha1);           % -------------------
 ZZb{2}=BL_Band(chic(j0:end,1),squeeze(chicB(j0:end,1,:)),alpha2);           % -------------------
 SizeXY=ML_SizeXY(DD,ML_minmax([ZZ ZZb{1}]),1,5,[-60 60]);                   % -------------------
-BL_ShadowPlotBW(ZZb,ZZ,DD,lg1,SizeXY,LS([2 1]),1,2)
+BL_ShadowPlotBW(ZZb,ZZ,DD,lg1,SizeXY,LS([1 2]),2,4)
 print('-dpng','-vector','-r600',[nomefile 'OG']);     % -------------------
 title('Output Gap - Level','fontweight','bold','fontsize',16)   % -------------------
 %print('-depsc','-vector','-r600',[nomefile 'OG']);
@@ -199,34 +199,43 @@ ZZ= chic(:,1); ZZ=ML_diff(ZZ(j0:end,:),1);
 ZZb{1}=BL_Band(ZZ,squeeze(ML_diff(chicB(j0:end,1,:),1)),alpha1);       % ---------------
 ZZb{2}=BL_Band(ZZ,squeeze(ML_diff(chicB(j0:end,1,:),1)),alpha2);       % ---------------
 SizeXY=ML_SizeXY(Dates4q(j0:end),ML_minmax([ZZ ZZb{1}]),1,5,[-60 60]);      % ---------------
-BL_ShadowPlotBW(ZZb,ZZ,Dates4q(j0:end),lg1,SizeXY,LS([2 1]),1,2)
+BL_ShadowPlotBW(ZZb,ZZ,Dates4q(j0:end),lg1,SizeXY,LS([1 2]),2,4)
 print('-dpng','-vector','-r600',[nomefile 'OG4Q']);    % ---------------
 title('Output Gap - 4Q % changes','fontweight','bold','fontsize',16) 
 
 
+chit2 = chit.*SY+MY;
+chitB2 = chitB.*SY+MY;
+chit3 = exp(chit2)./1000;
+chitB3 = exp(chitB2)./1000;
+
+Y3 = exp(Y2)./1000;
+
 % Potential output (levels)
-YY=[Y2(:,1)  chit(:,1)]; YY=YY(j0:end,:);                       
-YYb{1}=BL_Band(YY(:,2),squeeze(chitB(j0:end,1,:)),alpha1);                         % ------------------------
-YYb{2}=BL_Band(YY(:,2),squeeze(chitB(j0:end,1,:)),alpha2);                         % ------------------------
-SizeXY=ML_SizeXY(DD(1:60),ML_minmax([YY YYb{1}]),1,5);          
+YY=[Y3(:,1)  chit3(:,1)]; YY=YY(j0:end,:);                       
+YYb{1}=BL_Band(YY(:,2),squeeze(chitB3(j0:end,1,:)),alpha1);                         % ------------------------
+YYb{2}=BL_Band(YY(:,2),squeeze(chitB3(j0:end,1,:)),alpha2);                         % ------------------------
+SizeXY=ML_SizeXY(DD(1:60),ML_minmax([YY YYb{1}]),1,5);
+SizeXY(3)=SizeXY(3)+200;
+SizeXY(4)=SizeXY(4)-250;
 YYY{1}=YYb{1}(1:60,:); YYY{2}=YYb{2}(1:60,:);                                   % ------------------------
-BL_ShadowPlotBW(YYY,YY(1:60,:),DD(1:60),lg2,SizeXY,LS([2 1]),1,5)
+BL_ShadowPlotBW(YYY,YY(1:60,:),DD(1:60),lg2,SizeXY,LS([2 1]),2,4,50)
 print('-dpng','-vector','-r600',[nomefile 'PO_7084']);	% ------------------------
 title('Potential Output - 4Q % changes','fontweight','bold','fontsize',16) 
 
 
 % Potential Output - 4Q
-ZZ=[Y2(:,1) chit(:,1)]; ZZ=ML_diff(ZZ(j0:end,:),1);        
-ZZb{1}=BL_Band(ZZ(:,2),squeeze(ML_diff(chitB(j0:end,1,:),1)),alpha1);       % ---------------------
-ZZb{2}=BL_Band(ZZ(:,2),squeeze(ML_diff(chitB(j0:end,1,:),1)),alpha2);       % ---------------------
+ZZ=[Y3(:,1) chit3(:,1)]; ZZ=ML_diff(ZZ(j0:end,:),1);        
+ZZb{1}=BL_Band(ZZ(:,2),squeeze(ML_diff(chitB3(j0:end,1,:),1)),alpha1);       % ---------------------
+ZZb{2}=BL_Band(ZZ(:,2),squeeze(ML_diff(chitB3(j0:end,1,:),1)),alpha2);       % ---------------------
 SizeXY=ML_SizeXY(Dates4q(j0:end),ML_minmax([ZZ ZZb{1}]),1,5,[-60 60]);      % ---------------------
-BL_ShadowPlotBW(ZZb,ZZ,Dates4q(j0:end),lg2,SizeXY,LS([2 1]))
+BL_ShadowPlotBW(ZZb,ZZ,Dates4q(j0:end),lg2,SizeXY,LS([2 1]),2,4,20)
 print('-dpng','-vector','-r600',[nomefile 'PO']);      % ---------------------
 title('Potential Output - 4Q % changes','fontweight','bold','fontsize',16) 	% ---------------------
 
 
 % Contribution to GDP growth (BL)
- ZZ=ML_diff([chit(:,1) chic(:,1) zeta(:,1)],1); YY=ML_diff(Y2(:,1),1);               
+ ZZ=ML_diff([chit(:,1) chic(:,1) zeta(:,1)],1); YY=ML_diff(Y2(:,1),1).*100;               
 ML_ContributionGraphBW(YY(j0:4:end),ZZ(j0:4:end,:),Dates4q(j0:4:end),...     %
     {'GDP','Potential output','Output gap','Idiosyncratic'});                       % --------------------------
 print('-dpng','-vector','-r600',[nomefile 'DecompGDP_BL']);   % --------------------------

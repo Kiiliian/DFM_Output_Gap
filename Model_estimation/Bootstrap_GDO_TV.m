@@ -58,11 +58,12 @@ chilt = (BT(start2:end,:));                                             % linear
 
 eta=Z2(start2:end,:)-xitTb(cc:end,:)*EM.Lambda';                            % Stationary residuals (aka xi~I(0) plus near zero)
 zeta=0*eta;                                                                 % xi~I(1)
-isxi=find(type2==1)+12;                                                     % identifies states that are idiosyncratic components
+isxi=find(type2==1)+q*3;                                                     % identifies states that are idiosyncratic components
 istrend=find(EM.mu~=0); istrend(1:q)=[];                                       % identifies states with linear trend
 isc2=isxi(~ismember(isxi,istrend));                                         % identifies states that are idio RWnLT
 isc4=isxi(ismember(isxi,istrend));                                          % identifies states that are idio RWwLT
-J2=find(sum(EM.Lambda(:,isc2),2)==1); nJ2=ismember(1:N,J2);                    % identifies variables that have idio RWnLT 
+J2=find(sum(EM.Lambda(:,isc2),2)==1); 
+nJ2=ismember(1:N,J2);                    % identifies variables that have idio RWnLT 
 J4=find(sum(EM.Lambda(:,isc4),2)==1); nJ4=ismember(1:N,J4);                    % identifies variables that have idio RWwLT 
 zeta(:,nJ2)=xitTb(cc:end,isc2);                                           % idio for RWnLT
 zeta(:,nJ4)=xitTb(cc:end,isc4)-chilt(:,nJ4);                              % idio for RWwLT

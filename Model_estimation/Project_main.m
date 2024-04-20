@@ -32,10 +32,10 @@ rr=ones(q,1);                                           % ----------------------
 TV.id={1,33};                                                 % time varying parameters
 TV.Type={['trend';'none '],'mean'};                             % -----------------------
 TV.q0=[10^(-3), 10^(-2)];                                       % initial variance for TV states
-nboot=5;                                                     % Number of bootstrap
+nboot=1000;                                                     % Number of bootstrap
 iter = 100;
 method_data = 4;                                                %Method to impute covid data
-country = "FR";                                                  %Country
+country = "DE";                                                  %Country
 trans_treatment = 'light';                                      %Transformation for data treatment
 Block = 9;                                                       %Average size of blocks for bootstrap procedure
 

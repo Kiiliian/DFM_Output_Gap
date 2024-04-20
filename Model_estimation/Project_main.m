@@ -20,21 +20,21 @@ s=0;                                                            % lags in the fa
 d=q-1;                                                  % number of common cycles
 p=3;                                                            % lags VAR
 det=1;                                                          % parameters DFM
-GDO=1;                                                          % impose GDO restrictions
+GDO=0;                                                          % impose GDO restrictions
 model='VAR';                                                    % determines law of motion for the factors
 m=0;                                                            % parameters Robinson-Yao-Zhang
 cc=10;                                                          % obs to exclude because of initial condition
-TR1=[6 15 72 73 76:80 87];                                      % Variables for which I overwrite the trend test
-I0=[1:2 36 38 40 43 68:71 75];                                  % restrictions for EM algorithm
+TR1=[];                                      % Variables for which I overwrite the trend test
+I0=[];                                  % restrictions for EM algorithm
 I1=[];                                                          % -----------------------------
 rr=ones(q,1);                                           % -----------------------------
-TV.id={1:2,75};                                                 % time varying parameters
+TV.id={1,33};                                                 % time varying parameters
 TV.Type={['trend';'none '],'mean'};                             % -----------------------
 TV.q0=[10^(-3), 10^(-2)];                                       % initial variance for TV states
-nboot=1000;                                                     % Number of bootstrap
+nboot=5;                                                     % Number of bootstrap
 iter = 100;
 method_data = 4;                                                %Method to impute covid data
-country = "FR";                                                  %Country
+country = "DE";                                                  %Country
 trans_treatment = 'light';                                      %Transformation for data treatment
 Block = 9;                                                       %Average size of blocks for bootstrap procedure
 
@@ -148,16 +148,10 @@ parfor bb=1:nboot; disp(bb)
 
     [Z2s,xitTs]=ML_NSDFM_DGP_GDO_TV(T+1,N,q,s,p,EM,eta,type2,[1 0],Block);
     Boot=Bootstrap_GDO_TV(Z2s,NSDFM_SS,GDO,iter,tresh,cc,EM,xitTs,maxiter);
-    if country == "FR"
-    chiB(:,:,bb)=Boot.chi.*SY+MY;
-    chicB(:,:,bb)=Boot.chic.*SY;
-    chitB(:,:,bb)=Boot.chit.*SY+MY;
-    end
-    if country == "DE"
+
     chiB(:,:,bb)=Boot.chi;
     chicB(:,:,bb)=Boot.chic;
     chitB(:,:,bb)=Boot.chit;
-    end
 
 end
 toc

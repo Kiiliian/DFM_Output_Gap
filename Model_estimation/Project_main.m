@@ -12,7 +12,7 @@ clc
 %Filename=['USDB_Haver_' num2str(gm)];                   % file name    
 tresh=10^(-2);                                                  % tolerance treshold for EM algorithm
 star=10^(-5);                                                   % Initial variance R
-maxiter=50;                                                     % max number iteratioin EM algorithm
+maxiter=150;                                                     % max number iteratioin EM algorithm
 trans=3;                                                        % data transformation   
 out=2;                                                          % outlier treatment
 q=4;                                                            % number of factors
@@ -23,9 +23,10 @@ det=1;                                                          % parameters DFM
 GDO=0;                                                          % impose GDO restrictions
 model='VAR';                                                    % determines law of motion for the factors
 m=0;                                                            % parameters Robinson-Yao-Zhang
-cc=10;                                                          % obs to exclude because of initial condition
+cc=1;                                                          % obs to exclude because of initial condition
 TR1=[];                                      % Variables for which I overwrite the trend test
-I0=[];                                  % restrictions for EM algorithm
+I0=[1,33];                                  % restrictions for EM algorithm
+%I0=[1,33];
 I1=[];                                                          % -----------------------------
 rr=ones(q,1);                                           % -----------------------------
 TV.id={1,33};                                                 % time varying parameters
@@ -34,7 +35,7 @@ TV.q0=[10^(-3), 10^(-2)];                                       % initial varian
 nboot=5;                                                     % Number of bootstrap
 iter = 100;
 method_data = 4;                                                %Method to impute covid data
-country = "DE";                                                  %Country
+country = "FR";                                                  %Country
 trans_treatment = 'light';                                      %Transformation for data treatment
 Block = 9;                                                       %Average size of blocks for bootstrap procedure
 
@@ -152,7 +153,6 @@ parfor bb=1:nboot; disp(bb)
     chiB(:,:,bb)=Boot.chi;
     chicB(:,:,bb)=Boot.chic;
     chitB(:,:,bb)=Boot.chit;
-
 end
 toc
 
@@ -219,7 +219,7 @@ YYb{1}=BL_Band(YY(:,2),squeeze(chitB3(j0:end,1,:)),alpha1);                     
 YYb{2}=BL_Band(YY(:,2),squeeze(chitB3(j0:end,1,:)),alpha2);                         % ------------------------
 SizeXY=ML_SizeXY(DD(1:60),ML_minmax([YY YYb{1}]),1,5);
 YYY{1}=YYb{1}(1:60,:); YYY{2}=YYb{2}(1:60,:);                                   % ------------------------
-BL_ShadowPlotBW(YYY,YY(1:60,:),DD(1:60),lg2,SizeXY,LS([2 1]),2,4,50)
+BL_ShadowPlotBW(YYY,YY(1:60,:),DD(1:60),lg2,SizeXY,LS([2 1]),2,4,10)
 print('-dpng','-vector','-r600',[nomefile 'PO_7084']);	% ------------------------
 title('Potential Output - 4Q % changes','fontweight','bold','fontsize',16) 
 
@@ -229,7 +229,7 @@ ZZ=[Y3(:,1) chit3(:,1)]; ZZ=ML_diff(ZZ(j0:end,:),1);
 ZZb{1}=BL_Band(ZZ(:,2),squeeze(ML_diff(chitB3(j0:end,1,:),1)),alpha1);       % ---------------------
 ZZb{2}=BL_Band(ZZ(:,2),squeeze(ML_diff(chitB3(j0:end,1,:),1)),alpha2);       % ---------------------
 SizeXY=ML_SizeXY(Dates4q(j0:end),ML_minmax([ZZ ZZb{1}]),1,5,[-60 60]);      % ---------------------
-BL_ShadowPlotBW(ZZb,ZZ,Dates4q(j0:end),lg2,SizeXY,LS([2 1]),2,4,20)
+BL_ShadowPlotBW(ZZb,ZZ,Dates4q(j0:end),lg2,SizeXY,LS([2 1]),2,4,5)
 print('-dpng','-vector','-r600',[nomefile 'PO']);      % ---------------------
 title('Potential Output - 4Q % changes','fontweight','bold','fontsize',16) 	% ---------------------
 

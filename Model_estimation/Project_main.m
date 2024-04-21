@@ -15,7 +15,7 @@ star=10^(-5);                                                   % Initial varian
 maxiter=150;                                                     % max number iteratioin EM algorithm
 trans=3;                                                       % data transformation   
 out=2;                                                          % outlier treatment
-q=4;                                                            % number of factors
+q=2;                                                            % number of factors
 s=0;                                                            % lags in the factor loadings
 d=q-1;                                                  % number of common cycles
 p=3;                                                            % lags VAR
@@ -175,7 +175,7 @@ toc
 
 
 LS={'k-','k--','k:','k-.'};
-nomefile='Figure_Q3_';
+nomefile='Figure_Q2_';
 
 
 lg1={'Estimation'}; 

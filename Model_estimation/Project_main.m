@@ -13,7 +13,7 @@ clc
 tresh=10^(-2);                                                  % tolerance treshold for EM algorithm
 star=10^(-5);                                                   % Initial variance R
 maxiter=150;                                                     % max number iteratioin EM algorithm
-trans=3;                                                        % data transformation   
+trans=3;                                                       % data transformation   
 out=2;                                                          % outlier treatment
 q=4;                                                            % number of factors
 s=0;                                                            % lags in the factor loadings
@@ -175,10 +175,10 @@ toc
 
 
 LS={'k-','k--','k:','k-.'};
-nomefile='Figure_';
+nomefile='Figure_Q3_';
 
 
-lg1={'Estimation'};
+lg1={'Estimation'}; 
 lg2={'GDP','Estimation'};
 
 %%% ============ %%%
@@ -217,10 +217,10 @@ Y3 = exp(Y2)./1000;
 YY=[Y3(:,1)  chit3(:,1)]; YY=YY(j0:end,:);                       
 YYb{1}=BL_Band(YY(:,2),squeeze(chitB3(j0:end,1,:)),alpha1);                         % ------------------------
 YYb{2}=BL_Band(YY(:,2),squeeze(chitB3(j0:end,1,:)),alpha2);                         % ------------------------
-SizeXY=ML_SizeXY(DD(1:60),ML_minmax([YY YYb{1}]),1,5);
-YYY{1}=YYb{1}(1:60,:); YYY{2}=YYb{2}(1:60,:);                                   % ------------------------
-BL_ShadowPlotBW(YYY,YY(1:60,:),DD(1:60),lg2,SizeXY,LS([2 1]),2,4,10)
-print('-dpng','-vector','-r600',[nomefile 'PO_7084']);	% ------------------------
+SizeXY=ML_SizeXY(DD,ML_minmax([YY YYb{1}]),1,5);
+YYY{1}=YYb{1}; YYY{2}=YYb{2};                                   % ------------------------
+BL_ShadowPlotBW(YYY,YY,DD,lg2,SizeXY,LS([2 1]),2,4,10)
+print('-dpng','-vector','-r600',[nomefile 'PO']);	% ------------------------
 title('Potential Output - 4Q % changes','fontweight','bold','fontsize',16) 
 
 
@@ -230,7 +230,7 @@ ZZb{1}=BL_Band(ZZ(:,2),squeeze(ML_diff(chitB3(j0:end,1,:),1)),alpha1);       % -
 ZZb{2}=BL_Band(ZZ(:,2),squeeze(ML_diff(chitB3(j0:end,1,:),1)),alpha2);       % ---------------------
 SizeXY=ML_SizeXY(Dates4q(j0:end),ML_minmax([ZZ ZZb{1}]),1,5,[-60 60]);      % ---------------------
 BL_ShadowPlotBW(ZZb,ZZ,Dates4q(j0:end),lg2,SizeXY,LS([2 1]),2,4,5)
-print('-dpng','-vector','-r600',[nomefile 'PO']);      % ---------------------
+print('-dpng','-vector','-r600',[nomefile 'PO_4Q']);      % ---------------------
 title('Potential Output - 4Q % changes','fontweight','bold','fontsize',16) 	% ---------------------
 
 

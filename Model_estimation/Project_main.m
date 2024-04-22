@@ -15,7 +15,7 @@ star=10^(-5);                                                   % Initial varian
 maxiter=150;                                                     % max number iteratioin EM algorithm
 trans=3;                                                       % data transformation   
 out=2;                                                          % outlier treatment
-q=2;                                                            % number of factors
+q=4;                                                            % number of factors
 s=0;                                                            % lags in the factor loadings
 d=q-1;                                                  % number of common cycles
 p=3;                                                            % lags VAR
@@ -35,7 +35,7 @@ TV.q0=[10^(-3), 10^(-2)];                                       % initial varian
 nboot=1000;                                                     % Number of bootstrap
 iter = 100;
 method_data = 4;                                                %Method to impute covid data
-country = "DE";                                                  %Country
+country = "FR";                                                  %Country
 trans_treatment = 'light';                                      %Transformation for data treatment
 Block = 9;                                                       %Average size of blocks for bootstrap procedure
 
@@ -175,7 +175,7 @@ toc
 
 
 LS={'k-','k--','k:','k-.'};
-nomefile='Figure_Q2_';
+nomefile='Figure_Q4P3_FR_';
 
 
 lg1={'Estimation'}; 

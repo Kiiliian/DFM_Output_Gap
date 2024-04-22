@@ -15,7 +15,7 @@ star=10^(-5);                                                   % Initial varian
 maxiter=150;                                                     % max number iteratioin EM algorithm
 trans=3;                                                       % data transformation   
 out=2;                                                          % outlier treatment
-q=4;                                                            % number of factors
+q=2;                                                            % number of factors
 s=0;                                                            % lags in the factor loadings
 d=q-1;                                                  % number of common cycles
 p=3;                                                            % lags VAR
@@ -35,7 +35,7 @@ TV.q0=[10^(-3), 10^(-2)];                                       % initial varian
 nboot=1000;                                                     % Number of bootstrap
 iter = 100;
 method_data = 4;                                                %Method to impute covid data
-country = "FR";                                                  %Country
+country = "DE";                                                  %Country
 trans_treatment = 'light';                                      %Transformation for data treatment
 Block = 9;                                                       %Average size of blocks for bootstrap procedure
 
@@ -95,6 +95,13 @@ start2=start+s+cc-1;
 Y2=Y(start2:end,:);
 chi=(FF1(cc:end,:)*L'+BT(start2:end,:)).*SY+MY;                            % common component
 zeta=Y2-chi;  
+
+ID=[1 5 18 33 70];
+TableXi=var(zeta(:,ID));
+disp(' ');
+disp('Idiosyncratic variances');
+disp(TableXi);
+disp(' ');
 
 %%% ================================= %%%
 %%%  Estimate common trend and cycles of Factors with EM  %%%
@@ -175,7 +182,7 @@ toc
 
 
 LS={'k-','k--','k:','k-.'};
-nomefile='Figure_Q4P3_FR_';
+nomefile='Figure_Q3P3_FR_';
 
 
 lg1={'Estimation'}; 
